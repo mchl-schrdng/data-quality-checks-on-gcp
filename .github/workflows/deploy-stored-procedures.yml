@@ -13,15 +13,18 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
         with:
-          project_id: rational-symbol-411613
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
       - name: Set GCP Project ID
-        run: gcloud config set project rational-symbol-411613
+        run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: List all files for debugging
+        run: find "${{ github.workspace }}" -name "*.sql" 
 
       - name: Deploy Stored Procedures to BigQuery
         run: |
-          find "${{ github.workspace }}/data-quality-checks-on-gcp/tests" -name "*.sql" | while read sql_script; do
-            bq query --use_legacy_sql=false --dataset_id=data_quality_checks < "$sql_script"
+          find "${{ github.workspace }}/tests" -name "*.sql" | while read sql_script; do
+            bq query --use_legacy_sql=false < "$sql_script"
           done
