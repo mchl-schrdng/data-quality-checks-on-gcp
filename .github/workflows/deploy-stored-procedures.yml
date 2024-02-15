@@ -20,11 +20,7 @@ jobs:
       - name: Set hardcoded GCP Project ID
         run: gcloud config set project rational-symbol-411613
 
-      - name: List all files for debugging
-        run: find "${{ github.workspace }}" -name "*.sql"
-
       - name: Deploy Stored Procedures to BigQuery
         run: |
-          find "${{ github.workspace }}/data-quality-checks-on-gcp/tests" -name "*.sql" | while read sql_script; do
-            bq query --use_legacy_sql=false --project_id=rational-symbol-411613 --dataset_id=data_quality_checks < "$sql_script"
-          done
+          find "${{ github.workspace }}/tests" -name "*.sql" -exec bq query --use_legacy_sql=false --dataset_id=data_quality_checks < {} \;
+          find "${{ github.workspace }}/common" -name "*.sql" -exec bq query --use_legacy_sql=false --dataset_id=data_quality_checks < {} \;
