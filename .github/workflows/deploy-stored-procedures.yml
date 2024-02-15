@@ -19,6 +19,6 @@ jobs:
 
       - name: Deploy Stored Procedures to BigQuery
         run: |
-          find data-quality-checks-on-gcp/tests -name "*.sql" | while read sql_script; do
+          find ${{ github.workspace }}/data-quality-checks-on-gcp/tests -name "*.sql" | while read sql_script; do
             bq query --use_legacy_sql=false --project_id=${{ secrets.GCP_PROJECT_ID }} --dataset_id=data_quality_checks < "$sql_script"
           done
