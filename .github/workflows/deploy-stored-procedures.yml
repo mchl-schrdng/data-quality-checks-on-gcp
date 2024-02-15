@@ -9,18 +9,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
+      
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
         with:
-          project_id: rational-symbol-411613
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      - name: Set hardcoded GCP Project ID
-        run: gcloud config set project rational-symbol-411613
-
       - name: Deploy Stored Procedures to BigQuery
         run: |
-          find "${{ github.workspace }}/tests" -name "*.sql" -exec bq query --use_legacy_sql=false --dataset_id=data_quality_checks < {} \;
-          find "${{ github.workspace }}/common" -name "*.sql" -exec bq query --use_legacy_sql=false --dataset_id=data_quality_checks < {} \;
+          for sql_script in $(find ./ -name "*.sql"); do
+            cat "$sql_script" | bq query --use_legacy_sql=false
+          done
+        env:
+          BIGQUERY_DATASET: data_quality_checks
