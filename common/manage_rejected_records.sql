@@ -1,5 +1,3 @@
--- File: common/manage_rejected_records.sql
-
 CREATE OR REPLACE PROCEDURE `project_id.dataset.manage_rejected_records`(
     project_name STRING,
     dataset_name STRING,
