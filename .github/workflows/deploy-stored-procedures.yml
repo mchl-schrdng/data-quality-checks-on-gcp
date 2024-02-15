@@ -1,0 +1,31 @@
+name: Deploy Stored Procedures to BigQuery
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy from'
+        required: true
+        default: 'main'  # Set this to your default branch if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Deploy Stored Procedures
+        run: |
+          for sql_script in $(find data-quality-checks-on-gcp -name "*.sql"); do
+            bq query --use_legacy_sql=false --project_id=$GCP_PROJECT_ID < $sql_script
+          done
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
