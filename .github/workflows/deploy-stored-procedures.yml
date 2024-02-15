@@ -1,40 +1,26 @@
-name: Deploy Stored Procedures to BigQuery
+name: Deploy BigQuery Stored Procedures
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy from'
-        required: true
-        default: 'main'
 
 jobs:
-  setup-and-deploy:
+  deploy-procedures:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.branch }}
-
-      - name: Set up Cloud SDK
+      
+      - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}  # Use secret for GCP Project ID
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      - name: Create BigQuery Dataset
+      - name: Deploy Stored Procedures to BigQuery
         run: |
-          bq --project_id=${{ secrets.GCP_PROJECT_ID }} mk --dataset --location=US ${{ secrets.GCP_PROJECT_ID }}:your_dataset_name
-        shell: bash
-        env:
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Deploy Stored Procedures
-        run: |
-          for sql_script in $(find . -name "*.sql"); do
-            bq query --use_legacy_sql=false --project_id=${{ secrets.GCP_PROJECT_ID }} < $sql_script
+          for sql_script in path/to/sql_scripts/*.sql; do
+            bq query --use_legacy_sql=false --project_id=${{ secrets.GCP_PROJECT_ID }} --dataset_id=your-dataset-id < "$sql_script"
           done
         env:
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          BQ_DATASET_ID: data_quality_checks
